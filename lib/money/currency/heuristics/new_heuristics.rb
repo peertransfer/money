@@ -4,7 +4,7 @@ class Money
       include Money::Currency::Heuristics
 
       def currencies_by_iso_code
-        Tree.new(table).as_hash
+        TreeBuilder.build(table).as_hash
       end
 
       def currencies_by_symbol
@@ -23,29 +23,53 @@ class Money
         end
       end
 
-      class Tree
-        def initialize(currencies)
-          @currencies = currencies
-          @nodes = {}
+      class TreeBuilder
+        def self.build(currencies)
+          new(currencies).build
         end
 
-        def as_hash
-          build
+        def initialize(currencies)
+          @currencies = Currencies.new(currencies)
+          @tree = Tree.new
+        end
 
-          @nodes
+        def build
+          create_branches_from(@currencies.by_iso_code)
+          @tree
         end
 
         private
 
-        def build
-          @currencies.each do |_, currency|
-            path = currency[:iso_code].downcase
-            add(path, currency)
+        def create_branches_from(currencies)
+          currencies.each do |iso_code, currency|
+            @tree.add_node_to_branch(currency, iso_code)
           end
         end
+      end
 
-        def add(path, node)
-          (@nodes[path] ||= []) << node
+      class Currencies
+        def initialize(currencies)
+          @currencies = currencies
+        end
+
+        def by_iso_code
+          @currencies.each_with_object({}) do |(_, value), currencies_by_iso_code|
+            currencies_by_iso_code[value[:iso_code].downcase] = value
+          end
+        end
+      end
+
+      class Tree
+        def initialize
+          @branches = {}
+        end
+
+        def add_node_to_branch(node, branch)
+          @branches[branch] = [node]
+        end
+
+        def as_hash
+          @branches
         end
       end
     end
