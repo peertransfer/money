@@ -4,6 +4,13 @@ require "spec_helper"
 
 describe Money do
 
+  before do
+    @locale = I18n.config.available_locales
+    I18n.config.available_locales = :en
+  end
+
+  after {I18n.config.available_locales = @locale}
+
   describe ".new" do
     it "rounds the given cents to an integer" do
       Money.new(1.00, "USD").cents.should == 1
@@ -100,7 +107,7 @@ describe Money do
     it "stores cents as an integer regardless of what is passed into the constructor" do
       [ Money.new(100), 1.to_money, 1.00.to_money, BigDecimal('1.00').to_money ].each do |m|
         m.cents.should == 100
-        m.cents.should be_a(Fixnum)
+        m.cents.should be_a(Integer)
       end
     end
   end

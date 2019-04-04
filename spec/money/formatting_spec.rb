@@ -4,6 +4,13 @@ require "spec_helper"
 
 describe Money, "formatting" do
 
+  before do
+    @locale = I18n.config.available_locales
+    I18n.config.available_locales = [:en, :de, :ja]
+  end
+
+  after {I18n.config.available_locales = @locale}
+
   context "without i18n" do
     subject { Money.empty("USD") }
 

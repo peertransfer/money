@@ -210,10 +210,10 @@ class Money
       #
       def from_numeric(value, currency = Money.default_currency)
         case value
-        when Fixnum
+        when Integer
           from_fixnum(value, currency)
         when Numeric
-          from_bigdecimal(BigDecimal.new(value.to_s), currency)
+          from_bigdecimal(BigDecimal(value.to_s), currency)
         else
           raise ArgumentError, "`value' should be a Numeric object"
         end
